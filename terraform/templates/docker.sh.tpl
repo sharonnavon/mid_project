@@ -7,34 +7,17 @@ sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubun
 sudo apt -qq update &> /dev/null
 sudo apt install -yqq apt-transport-https ca-certificates curl gnupg2 software-properties-common docker-ce &> /dev/null
 
+# Download the desired packages
 
-# Build & run the dummy container
+
+
+# Build & run the container
 sudo mkdir /opt/docker
 cd /opt/docker
-sudo wget https://raw.githubusercontent.com/sharonnavon/project/master/terraform/templates/Dockerfile
+sudo wget https://raw.githubusercontent.com/sharonnavon/mid_project/master/terraform/templates/Dockerfile
 sudo wget -O /opt/docker/my_dummy_exporter.py https://raw.githubusercontent.com/sharonnavon/project/master/terraform/templates/my_dummy_exporter.py
 sudo docker build -t dummyapp .
 sudo docker run --name=dummyapp -v /opt/docker/my_dummy_exporter.py:/tmp/my_dummy_exporter.py -d -p 65433:65433 dummyapp
-
-
-# Register the dummy app in consul
-cat << EOF | sudo tee /etc/consul.d/dummy-app.json
-{
-  "service": {
-    "name": "dummy-app",
-    "id": "dummy-app",
-    "port": 65433,
-    "check": {
-      "name": "dummy_app port 65433 http check",
-      "interval": "5s",
-      "http": "http://localhost:65433"
-    }
-  }
-}
-
-EOF
-
-sudo systemctl reload consul
 
 
 # Build & run the filebeat container
